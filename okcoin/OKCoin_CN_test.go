@@ -1,7 +1,7 @@
 package okcoin
 
 import (
-	"github.com/nntaoli-project/GoEx"
+	"github.com/i0n/GoEx"
 	"net/http"
 	"testing"
 )
@@ -18,8 +18,8 @@ func TestOKCoinCN_API_GetDepth(t *testing.T) {
 	t.Log(dep)
 }
 
-func TestOKCoinCN_API_GetKlineRecords(t *testing.T) {
-	klines , _ := okcn.GetKlineRecords(goex.BTC_CNY , "1min" , 1000 , -1)
-	t.Log(klines)
-}
+//func TestOKCoinCN_API_GetKlineRecords(t *testing.T) {
+//	klines , _ := okcn.GetKlineRecords(goex.BTC_CNY , "1min" , 1000 , -1)
+//	t.Log(klines)
+//}
 

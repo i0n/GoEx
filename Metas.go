@@ -27,7 +27,7 @@ type Trade struct {
 type SubAccount struct {
 	Currency Currency
 	Amount,
-	ForzenAmount,
+	FrozenAmount,
 	LoanAmount float64
 }
 
@@ -51,6 +51,25 @@ type Ticker struct {
 type DepthRecord struct {
 	Price,
 	Amount float64
+}
+
+// Withdraw is a uniform struct for returning Withdraw request results.
+type Withdraw struct {
+  RefID         string  `json:"refid"`
+  WithdrawalID  int     `json:"withdrawal_id"`
+  WithdrawID    int     `json:"withdraw_id"`
+  Result        bool    `json:"result"`
+  Status        string  `json:"status"`
+  Message       string  `json:"message"`
+  ErrorCode     int     `json:"error_code"`
+}
+
+// CryptoAddress stores the address hash and related information.
+type CryptoAddress struct {
+  Currency      Currency
+  Address       string
+  Tag           string
+  ExchangeName  string
 }
 
 type DepthRecords []DepthRecord

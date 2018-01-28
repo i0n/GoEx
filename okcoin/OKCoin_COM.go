@@ -3,7 +3,7 @@ package okcoin
 import (
 	"encoding/json"
 	"errors"
-	. "github.com/nntaoli-project/GoEx"
+	. "github.com/i0n/GoEx"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -60,27 +60,48 @@ func (ctx *OKCoinCOM_API) GetAccount() (*Account, error) {
 
 	var btcSubAccount SubAccount
 	var ltcSubAccount SubAccount
-	var cnySubAccount SubAccount
+	var ethSubAccount SubAccount
+	var etcSubAccount SubAccount
+	var bchSubAccount SubAccount
+	var usdSubAccount SubAccount
 
 	btcSubAccount.Currency = BTC
 	btcSubAccount.Amount, _ = strconv.ParseFloat(free["btc"].(string), 64)
 	btcSubAccount.LoanAmount = 0
-	btcSubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["btc"].(string), 64)
+	btcSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["btc"].(string), 64)
+
+	bchSubAccount.Currency = BCH
+	bchSubAccount.Amount, _ = strconv.ParseFloat(free["bch"].(string), 64)
+	bchSubAccount.LoanAmount = 0
+	bchSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["bch"].(string), 64)
 
 	ltcSubAccount.Currency = LTC
 	ltcSubAccount.Amount, _ = strconv.ParseFloat(free["ltc"].(string), 64)
 	ltcSubAccount.LoanAmount = 0
-	ltcSubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["ltc"].(string), 64)
+	ltcSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["ltc"].(string), 64)
 
-	cnySubAccount.Currency = CNY
-	cnySubAccount.Amount, _ = strconv.ParseFloat(free["usd"].(string), 64)
-	cnySubAccount.LoanAmount = 0
-	cnySubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["usd"].(string), 64)
+	etcSubAccount.Currency = ETC
+	etcSubAccount.Amount, _ = strconv.ParseFloat(free["etc"].(string), 64)
+	etcSubAccount.LoanAmount = 0
+	etcSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["etc"].(string), 64)
 
-	account.SubAccounts = make(map[Currency]SubAccount, 3)
+	ethSubAccount.Currency = ETH
+	ethSubAccount.Amount, _ = strconv.ParseFloat(free["eth"].(string), 64)
+	ethSubAccount.LoanAmount = 0
+	ethSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["eth"].(string), 64)
+
+	usdSubAccount.Currency = USD
+	usdSubAccount.Amount, _ = strconv.ParseFloat(free["usd"].(string), 64)
+	usdSubAccount.LoanAmount = 0
+	usdSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["usd"].(string), 64)
+
+	account.SubAccounts = make(map[Currency]SubAccount, 6)
 	account.SubAccounts[BTC] = btcSubAccount
 	account.SubAccounts[LTC] = ltcSubAccount
-	account.SubAccounts[USD] = cnySubAccount
+	account.SubAccounts[ETH] = ethSubAccount
+	account.SubAccounts[ETC] = etcSubAccount
+	account.SubAccounts[BCH] = bchSubAccount
+	account.SubAccounts[USD] = usdSubAccount
 
 	return account, nil
 }

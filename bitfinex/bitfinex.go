@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/nntaoli-project/GoEx"
+	. "github.com/i0n/GoEx"
 	"net/http"
 	"strconv"
 	"strings"
@@ -64,7 +64,7 @@ func (bfx *Bitfinex) GetDepth(size int, currencyPair CurrencyPair) (*Depth, erro
 	if err != nil {
 		return nil, err
 	}
-	println("resp:", resp)
+	//println("resp:", resp)
 	bids := resp["bids"].([]interface{})
 	asks := resp["asks"].([]interface{})
 
@@ -126,6 +126,7 @@ func (bfx *Bitfinex) GetWalletBalances() (map[string]*Account, error) {
 		account := walletmap[typeStr]
 		if account == nil {
 			account = new(Account)
+      account.Exchange = bfx.GetExchangeName()
 			account.SubAccounts = make(map[Currency]SubAccount, 6)
 		}
 
@@ -134,7 +135,7 @@ func (bfx *Bitfinex) GetWalletBalances() (map[string]*Account, error) {
 		account.SubAccounts[currency] = SubAccount{
 			Currency:     currency,
 			Amount:       available,
-			ForzenAmount: amount - available,
+			FrozenAmount: amount - available,
 			LoanAmount:   0}
 
 		walletmap[typeStr] = account
@@ -150,6 +151,47 @@ func (bfx *Bitfinex) GetAccount() (*Account, error) {
 		return nil, err
 	}
 	return wallets["exchange"], nil
+}
+
+func (bfx *Bitfinex) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
+  var amountMinusTransactionFee float64
+	path := "withdraw"
+  var c string
+  switch x := currencyPair.CurrencyA; x {
+	case BTC:
+		c = "bitcoin"
+    amountMinusTransactionFee = amount - 0.0008
+  case BCH:
+		c = "bcash"
+    amountMinusTransactionFee = amount - 0.0001
+  case LTC:
+		c = "litecoin"
+    amountMinusTransactionFee = amount - 0.001
+  case ETH:
+		c = "ethereum"
+    amountMinusTransactionFee = amount - 0.0027
+  case ETC:
+    c = "ethereumc"
+    amountMinusTransactionFee = amount - 0.01
+	default:
+		return nil, errors.New("Unsupported currency type")
+	}
+  a := strconv.FormatFloat(amountMinusTransactionFee, 'f', -1, 64)
+	params := map[string]interface{}{
+		"withdraw_type":    c,
+		"walletselected":   wallet,
+		"address":          address.Address,
+		"amount":           a,
+  }
+	var res []Withdraw
+	err := bfx.doAuthenticatedRequest("POST", path, params, &res)
+	if err != nil {
+		return nil, err
+	}
+  if res[0].Status != "success" {
+    return &res[0], errors.New(res[0].Message)
+  }
+	return &res[0], nil
 }
 
 func (bfx *Bitfinex) placeOrder(orderType, side, amount, price string, pair CurrencyPair) (*Order, error) {
@@ -218,7 +260,7 @@ func (bfx *Bitfinex) CancelOrder(orderId string, currencyPair CurrencyPair) (boo
 	if err != nil {
 		return false, err
 	}
-	return respmap["is_cancelled"].(bool), nil
+	return respmap["is_live"].(bool), nil
 }
 
 func (bfx *Bitfinex) toOrder(respmap map[string]interface{}) *Order {
@@ -333,15 +375,15 @@ func (bfx *Bitfinex) adaptCurrencyPair(pair CurrencyPair) CurrencyPair {
 
 	DASH := NewCurrency("DASH", "")
 	DSH := NewCurrency("DSH", "")
-	QTUM := NewCurrency("QTUM", "")
-	QTM := NewCurrency("QTM", "")
+	//QTUM := NewCurrency("QTUM", "")
+	//QTM := NewCurrency("QTM", "")
 	IOTA := NewCurrency("IOTA", "")
 	IOT := NewCurrency("IOT", "")
 
 	if pair.CurrencyA == DASH {
 		currencyA = DSH
-	} else if pair.CurrencyA == QTUM {
-		currencyA = QTM
+	//} else if pair.CurrencyA == QTUM {
+	//	currencyA = QTM
 	} else if pair.CurrencyA == IOTA {
 		currencyA = IOT
 	} else {

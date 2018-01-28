@@ -3,7 +3,7 @@ package okcoin
 import (
 	"encoding/json"
 	"errors"
-	. "github.com/nntaoli-project/GoEx"
+	. "github.com/i0n/GoEx"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -64,7 +64,7 @@ func (ctx *OKExSpot) GetAccount() (*Account, error) {
 		subAcc := SubAccount{
 			Currency:     currencyKey,
 			Amount:       ToFloat64(v),
-			ForzenAmount: ToFloat64(freezed[k])}
+			FrozenAmount: ToFloat64(freezed[k])}
 		account.SubAccounts[currencyKey] = subAcc
 	}
 

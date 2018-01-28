@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/nntaoli-project/GoEx"
+	. "github.com/i0n/GoEx"
 	"net/http"
 	"net/url"
 	"strings"
+  "strconv"
 	"time"
-	"sort"
 )
 
 type BaseResponse struct {
@@ -30,6 +30,16 @@ type Kraken struct {
 	httpClient *http.Client
 	accessKey,
 	secretKey string
+}
+
+type WithdrawStatus struct {
+	Method string `json:"method"`
+	AClass  string `json:"aclass"`
+	Asset string `json:"asset"`
+	RefID string `json:"refid"`
+	TXID  string `json:"txid"`
+	Info  string `json:"vol"`
+	Status string  `json:"status"`
 }
 
 var (
@@ -147,7 +157,7 @@ func (k *Kraken) GetOneOrder(orderId string, currency CurrencyPair) (*Order, err
 	}
 
 	if len(orders) == 0 {
-		return nil, errors.New("not fund the order " + orderId)
+		return nil, errors.New("Could not find the order " + orderId)
 	}
 
 	ord := &orders[0]
@@ -192,16 +202,17 @@ func (k *Kraken) GetAccount() (*Account, error) {
 	}
 
 	acc := new(Account)
+	acc.Exchange = k.GetExchangeName()
 	acc.SubAccounts = make(map[Currency]SubAccount)
 
 	for key, v := range resustmap {
 		currency := k.convertCurrency(key)
 		amount := ToFloat64(v)
 		//log.Println(symbol, amount)
-		acc.SubAccounts[currency] = SubAccount{Currency: currency, Amount: amount, ForzenAmount: 0, LoanAmount: 0}
+		acc.SubAccounts[currency] = SubAccount{Currency: currency, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
 
 		if currency.Symbol == "XBT" {
-			acc.SubAccounts[BTC] = SubAccount{Currency: BTC, Amount: amount, ForzenAmount: 0, LoanAmount: 0}
+			acc.SubAccounts[BTC] = SubAccount{Currency: BTC, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
 		}
 	}
 
@@ -209,11 +220,33 @@ func (k *Kraken) GetAccount() (*Account, error) {
 
 }
 
-//func (k *Kraken) GetTradeBalance() {
-//	var resultmap map[string]interface{}
-//	k.doAuthenticatedRequest("POST", "private/TradeBalance", url.Values{}, &resultmap)
-//	log.Println(resultmap)
-//}
+func (k *Kraken) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
+	apiuri := "private/Withdraw"
+	params := url.Values{}
+  a := strconv.FormatFloat(amount, 'f', -1, 64)
+	params.Set("amount", a)
+	params.Set("asset", currencyPair.CurrencyA.String())
+	params.Set("key", address.Tag)
+  var result Withdraw
+	err := k.doAuthenticatedRequest("POST", apiuri, params, &result)
+	if err != nil {
+		return nil, err
+	}
+  return &result, nil
+}
+
+func (k *Kraken) WithdrawStatus(currency Currency) (*[]WithdrawStatus, error) {
+	apiuri := "private/WithdrawStatus"
+	params := url.Values{}
+	params.Set("asset", currency.String())
+  var result []WithdrawStatus
+	err := k.doAuthenticatedRequest("POST", apiuri, params, &result)
+	if err != nil {
+		return nil, err
+	}
+  //fmt.Printf("resultmap: %v#\n", resultmap[0])
+  return &result, nil
+}
 
 func (k *Kraken) GetTicker(currency CurrencyPair) (*Ticker, error) {
 	var resultmap map[string]interface{}
@@ -260,9 +293,6 @@ func (k *Kraken) GetDepth(size int, currency CurrencyPair) (*Depth, error) {
 		}
 		break
 	}
-
-	sort.Sort(sort.Reverse(dep.AskList)) //reverse
-
 	return &dep, nil
 }
 

@@ -9,7 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	. "github.com/nntaoli-project/GoEx"
+	. "github.com/i0n/GoEx"
+  "bitbucket.org/i0n/compounda/utils"
 )
 
 const (
@@ -26,6 +27,7 @@ const (
 	url_orders_info   = "orders_info.do"
 	order_history_uri = "order_history.do"
 	trade_uri         = "trade_history.do"
+  url_withdraw      = "withdraw.do"
 )
 
 type OKCoinCN_API struct {
@@ -71,8 +73,9 @@ func (ctx *OKCoinCN_API) buildPostForm(postForm *url.Values) error {
 
 	payload := postForm.Encode()
 	payload = payload + "&secret_key=" + ctx.secret_key
+	payload2, _ := url.QueryUnescape(payload) // can't escape for sign
 
-	sign, err := GetParamMD5Sign(ctx.secret_key, payload)
+	sign, err := GetParamMD5Sign(ctx.secret_key, payload2)
 	if err != nil {
 		return err
 	}
@@ -80,6 +83,50 @@ func (ctx *OKCoinCN_API) buildPostForm(postForm *url.Values) error {
 	postForm.Set("sign", strings.ToUpper(sign))
 	//postForm.Del("secret_key")
 	return nil
+}
+
+func (ctx *OKCoinCN_API) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
+  var c string
+	postData := url.Values{}
+  s := strings.ToLower(currencyPair.ToSymbol("_"))
+	postData.Set("symbol", s)
+  //c := strconv.FormatFloat(chargefee, 'f', -1, 64)
+  switch x := currencyPair.CurrencyA; x {
+  case BTC:
+    c = "0.002"
+  case LTC:
+    c = "0.001"
+  case ETH:
+    c = "0.01"
+  case ETC:
+    c = "0.01"
+  }
+	postData.Set("chargefee", c)
+	postData.Set("withdraw_address", address.Address)
+  a := strconv.FormatFloat(amount, 'f', -1, 64)
+	postData.Set("withdraw_amount", a)
+	postData.Set("trade_pwd", adminPassword)
+	postData.Set("target", "address")
+
+	ctx.buildPostForm(&postData)
+
+	body, err := HttpPostForm(ctx.client, ctx.api_base_url+url_withdraw, postData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res Withdraw
+
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		return &res, err
+	}
+  if res.Result == false {
+    return &res, errors.New(strconv.Itoa(res.ErrorCode))
+  }
+
+	return &res, nil
 }
 
 func (ctx *OKCoinCN_API) placeOrder(side, amount, price string, currency CurrencyPair) (*Order, error) {
@@ -313,32 +360,32 @@ func (ctx *OKCoinCN_API) GetAccount() (*Account, error) {
 	btcSubAccount.Currency = BTC
 	btcSubAccount.Amount, _ = strconv.ParseFloat(free["btc"].(string), 64)
 	btcSubAccount.LoanAmount = 0
-	btcSubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["btc"].(string), 64)
+	btcSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["btc"].(string), 64)
 
 	ltcSubAccount.Currency = LTC
 	ltcSubAccount.Amount, _ = strconv.ParseFloat(free["ltc"].(string), 64)
 	ltcSubAccount.LoanAmount = 0
-	ltcSubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["ltc"].(string), 64)
+	ltcSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["ltc"].(string), 64)
 
 	ethSubAccount.Currency = ETH
 	ethSubAccount.Amount, _ = strconv.ParseFloat(free["eth"].(string), 64)
 	ethSubAccount.LoanAmount = 0
-	ethSubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["eth"].(string), 64)
+	ethSubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["eth"].(string), 64)
 
 	etcSubAccount.Currency = ETC
 	etcSubAccount.Amount = ToFloat64(free["etc"])
 	etcSubAccount.LoanAmount = 0
-	etcSubAccount.ForzenAmount = ToFloat64(freezed["etc"])
+	etcSubAccount.FrozenAmount = ToFloat64(freezed["etc"])
 
 	bccSubAccount.Currency = BCC
 	bccSubAccount.Amount = ToFloat64(free["bcc"])
 	bccSubAccount.LoanAmount = 0
-	bccSubAccount.ForzenAmount = ToFloat64(freezed["bcc"])
+	bccSubAccount.FrozenAmount = ToFloat64(freezed["bcc"])
 
 	cnySubAccount.Currency = CNY
 	cnySubAccount.Amount, _ = strconv.ParseFloat(free["cny"].(string), 64)
 	cnySubAccount.LoanAmount = 0
-	cnySubAccount.ForzenAmount, _ = strconv.ParseFloat(freezed["cny"].(string), 64)
+	cnySubAccount.FrozenAmount, _ = strconv.ParseFloat(freezed["cny"].(string), 64)
 
 	account.SubAccounts = make(map[Currency]SubAccount, 3)
 	account.SubAccounts[BTC] = btcSubAccount
@@ -404,6 +451,7 @@ func (ctx *OKCoinCN_API) GetDepth(size int, currency CurrencyPair) (*Depth, erro
 		}
 		depth.AskList = append(depth.AskList, dr)
 	}
+  utils.ReverseSlice(depth.AskList) //reverse
 
 	for _, v := range bodyDataMap["bids"].([]interface{}) {
 		var dr DepthRecord

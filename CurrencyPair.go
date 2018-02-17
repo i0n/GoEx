@@ -2,6 +2,7 @@ package goex
 
 import "strings"
 
+// Currency a struct detailing a currency type
 type Currency struct {
 	Symbol string
 	Desc   string
@@ -11,7 +12,7 @@ func (c Currency) String() string {
 	return c.Symbol
 }
 
-// A->B(A兑换为B)
+// CurrencyPair a struct containing two currency structs 
 type CurrencyPair struct {
 	CurrencyA Currency
 	CurrencyB Currency
@@ -45,6 +46,37 @@ var (
 	BCD     = Currency{"BCD",""}
 	NEO     = Currency{"NEO","neo.org"}
 	HSR     = Currency{"HSR",""}
+  IOTA    = Currency{"IOTA",""}
+  XMR     = Currency{"XMR",""}
+  DASH    = Currency{"DASH",""}
+  OMG     = Currency{"OMG",""}
+  ELF     = Currency{"ELF",""}
+  SAN     = Currency{"SAN",""}
+  TRX     = Currency{"TRX",""}
+  ZRX     = Currency{"ZRX",""}
+  ETP     = Currency{"ETP",""}
+  QASH    = Currency{"QASH",""}
+  SNT     = Currency{"SNT",""}
+  DATA    = Currency{"DATA",""}
+  EDO     = Currency{"EDO",""}
+  FUN     = Currency{"FUN",""}
+  YYW     = Currency{"YYW",""}
+  TNB     = Currency{"TNB",""}
+  BAT     = Currency{"BAT",""}
+  GNT     = Currency{"GNT",""}
+  AVT     = Currency{"AVT",""}
+  AID     = Currency{"AID",""}
+  RLC     = Currency{"RLC",""}
+  REP     = Currency{"REP",""}
+  MNA     = Currency{"MNA",""}
+  SNG     = Currency{"SNG",""}
+  SPK     = Currency{"SPK",""}
+  RCN     = Currency{"RCN",""}
+  XLM     = Currency{"XLM",""}
+  XDG     = Currency{"XDG",""}
+  ICN     = Currency{"ICN",""}
+  MLN     = Currency{"MLN",""}
+  GNO     = Currency{"GNO",""}
 
 	//currency pair
 
@@ -74,6 +106,42 @@ var (
 	BCC_USD = CurrencyPair{BCC, USD}
 	XRP_USD = CurrencyPair{XRP, USD}
 	BCD_USD = CurrencyPair{BCD,USD}
+	NEO_USD = CurrencyPair{NEO,USD}
+	EOS_USD = CurrencyPair{EOS,USD}
+	IOTA_USD = CurrencyPair{IOTA,USD}
+	XMR_USD = CurrencyPair{XMR,USD}
+	DASH_USD = CurrencyPair{DASH,USD}
+	ZEC_USD = CurrencyPair{ZEC,USD}
+	OMG_USD = CurrencyPair{OMG,USD}
+	ELF_USD = CurrencyPair{ELF,USD}
+	BTG_USD = CurrencyPair{BTG,USD}
+	SAN_USD = CurrencyPair{SAN,USD}
+	QTUM_USD = CurrencyPair{QTUM,USD}
+	TRX_USD = CurrencyPair{TRX,USD}
+	ZRX_USD = CurrencyPair{ZRX,USD}
+	ETP_USD = CurrencyPair{ETP,USD}
+	QASH_USD = CurrencyPair{QASH,USD}
+	SNT_USD = CurrencyPair{SNT,USD}
+	DATA_USD = CurrencyPair{DATA,USD}
+	EDO_USD = CurrencyPair{EDO,USD}
+	FUN_USD = CurrencyPair{FUN,USD}
+	YYW_USD = CurrencyPair{YYW,USD}
+	TNB_USD = CurrencyPair{TNB,USD}
+	BAT_USD = CurrencyPair{BAT,USD}
+	GNT_USD = CurrencyPair{GNT,USD}
+	AVT_USD = CurrencyPair{AVT,USD}
+	AID_USD = CurrencyPair{AID,USD}
+	RLC_USD = CurrencyPair{RLC,USD}
+	REP_USD = CurrencyPair{REP,USD}
+	MNA_USD = CurrencyPair{MNA,USD}
+	SNG_USD = CurrencyPair{SNG,USD}
+	SPK_USD = CurrencyPair{SPK,USD}
+	RCN_USD = CurrencyPair{RCN,USD}
+	XLM_USD = CurrencyPair{XLM,USD}
+	XDG_USD = CurrencyPair{XDG,USD}
+	ICN_USD = CurrencyPair{ICN,USD}
+	MLN_USD = CurrencyPair{MLN,USD}
+	GNO_USD = CurrencyPair{GNO,USD}
 
 	BTC_USDT = CurrencyPair{BTC,USDT}
 	LTC_USDT = CurrencyPair{LTC, USDT}

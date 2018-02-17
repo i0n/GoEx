@@ -32,6 +32,25 @@ func (bfx *Bitfinex) GetExchangeName() string {
 	return EXCHANGE_NAME
 }
 
+// GetSymbols Get all trade symbol pairs
+func (bfx *Bitfinex) GetSymbols() (map[string]interface{}, error) {
+  apiUrl := fmt.Sprintf("%s/symbols", BASE_URL)
+	resp, err := HttpGet(bfx.httpClient, apiUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp["error"] != nil {
+		return nil, errors.New(resp["error"].(string))
+	}
+  for k, v := range resp {
+    fmt.Println(k)
+    fmt.Println(v)
+    fmt.Println("")
+  }
+  return resp, nil
+}
+
 func (bfx *Bitfinex) GetTicker(currencyPair CurrencyPair) (*Ticker, error) {
 	//pubticker
 	currencyPair = bfx.adaptCurrencyPair(currencyPair)
@@ -59,6 +78,7 @@ func (bfx *Bitfinex) GetTicker(currencyPair CurrencyPair) (*Ticker, error) {
 }
 
 func (bfx *Bitfinex) GetDepth(size int, currencyPair CurrencyPair) (*Depth, error) {
+	currencyPair = bfx.adaptCurrencyPair(currencyPair)
 	apiUrl := fmt.Sprintf("%s/book/%s?limit_bids=%d&limit_asks=%d", BASE_URL, bfx.currencyPairToSymbol(currencyPair), size, size)
 	resp, err := HttpGet(bfx.httpClient, apiUrl)
 	if err != nil {
@@ -373,17 +393,17 @@ func (bfx *Bitfinex) adaptCurrencyPair(pair CurrencyPair) CurrencyPair {
 	var currencyA Currency
 	var currencyB Currency
 
-	DASH := NewCurrency("DASH", "")
+	//DASH := NewCurrency("DASH", "")
 	DSH := NewCurrency("DSH", "")
 	//QTUM := NewCurrency("QTUM", "")
-	//QTM := NewCurrency("QTM", "")
-	IOTA := NewCurrency("IOTA", "")
+	QTM := NewCurrency("QTM", "")
+	//IOTA := NewCurrency("IOTA", "")
 	IOT := NewCurrency("IOT", "")
 
 	if pair.CurrencyA == DASH {
 		currencyA = DSH
-	//} else if pair.CurrencyA == QTUM {
-	//	currencyA = QTM
+	} else if pair.CurrencyA == QTUM {
+		currencyA = QTM
 	} else if pair.CurrencyA == IOTA {
 		currencyA = IOT
 	} else {

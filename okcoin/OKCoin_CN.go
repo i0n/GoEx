@@ -11,6 +11,7 @@ import (
 	"strings"
 	. "github.com/i0n/GoEx"
   "bitbucket.org/i0n/compounda/utils"
+  "bitbucket.org/i0n/compounda/exchanges"
 )
 
 const (
@@ -90,16 +91,15 @@ func (ctx *OKCoinCN_API) Withdraw(currencyPair CurrencyPair, address CryptoAddre
 	postData := url.Values{}
   s := strings.ToLower(currencyPair.ToSymbol("_"))
 	postData.Set("symbol", s)
-  //c := strconv.FormatFloat(chargefee, 'f', -1, 64)
   switch x := currencyPair.CurrencyA; x {
   case BTC:
-    c = "0.002"
+    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
   case LTC:
-    c = "0.001"
+    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
   case ETH:
-    c = "0.01"
+    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
   case ETC:
-    c = "0.01"
+    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
   }
 	postData.Set("chargefee", c)
 	postData.Set("withdraw_address", address.Address)

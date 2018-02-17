@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/i0n/GoEx"
+  "bitbucket.org/i0n/compounda/exchanges"
 	"net/http"
 	"strconv"
 	"strings"
@@ -180,19 +181,50 @@ func (bfx *Bitfinex) Withdraw(currencyPair CurrencyPair, address CryptoAddress, 
   switch x := currencyPair.CurrencyA; x {
 	case BTC:
 		c = "bitcoin"
-    amountMinusTransactionFee = amount - 0.0008
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
   case BCH:
 		c = "bcash"
-    amountMinusTransactionFee = amount - 0.0001
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
   case LTC:
 		c = "litecoin"
-    amountMinusTransactionFee = amount - 0.001
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
   case ETH:
 		c = "ethereum"
-    amountMinusTransactionFee = amount - 0.0027
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
   case ETC:
     c = "ethereumc"
-    amountMinusTransactionFee = amount - 0.01
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case ZEC:
+    c = "zcash"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case XMR:
+    c = "monero"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case DASH:
+    c = "dash"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case XRP:
+    c = "ripple"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case EOS:
+    c = "eos"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case NEO:
+    c = "neo"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case AVT:
+    c = "aventus"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case QTUM:
+    c = "qtum"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  case EDO:
+    c = "eidoo"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+  // REP is undocumented...
+  case REP:
+    c = "augur"
+    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
 	default:
 		return nil, errors.New("Unsupported currency type")
 	}

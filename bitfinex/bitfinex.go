@@ -148,7 +148,7 @@ func (bfx *Bitfinex) GetWalletBalances() (map[string]*Account, error) {
 		if account == nil {
 			account = new(Account)
       account.Exchange = bfx.GetExchangeName()
-			account.SubAccounts = make(map[Currency]SubAccount, 6)
+			account.SubAccounts = make(map[Currency]SubAccount)
 		}
 
 		account.NetAsset = amount

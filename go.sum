@@ -1,0 +1,15 @@
+bitbucket.org/i0n/compounda v0.0.0-20180217193440-5a99dffdaaff h1:EXo6LQsq7HpZ/m+37LSvlksYT/XC9nrqt7PdmZakK2Q=
+bitbucket.org/i0n/compounda v0.0.0-20180217193440-5a99dffdaaff/go.mod h1:MhpkYg79ryqK62SD06oC7Jo8YSaqJDfR5X0qMqhhYEY=
+github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
+github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
+github.com/nntaoli-project/GoEx v0.0.0-20180907090022-2ff0dbddf62e h1:mkOJXdtYamB+zm2AeKR8By6cxZC28RzHTU/RocX9loU=
+github.com/nntaoli-project/GoEx v0.0.0-20180907090022-2ff0dbddf62e/go.mod h1:ze3baaMG59EjqNH5kLe2GyYprfs27Ch30Xl+PTQe014=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
+github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
+gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

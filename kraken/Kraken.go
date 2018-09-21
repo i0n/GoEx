@@ -8,12 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/i0n/GoEx"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
-  "strconv"
 	"time"
+
+	"github.com/nntaoli-project/GoEx"
 )
 
 type BaseResponse struct {
@@ -34,12 +35,12 @@ type Kraken struct {
 
 type WithdrawStatus struct {
 	Method string `json:"method"`
-	AClass  string `json:"aclass"`
-	Asset string `json:"asset"`
-	RefID string `json:"refid"`
-	TXID  string `json:"txid"`
-	Info  string `json:"vol"`
-	Status string  `json:"status"`
+	AClass string `json:"aclass"`
+	Asset  string `json:"asset"`
+	RefID  string `json:"refid"`
+	TXID   string `json:"txid"`
+	Info   string `json:"vol"`
+	Status string `json:"status"`
 }
 
 var (
@@ -54,7 +55,7 @@ func New(client *http.Client, accesskey, secretkey string) *Kraken {
 	return &Kraken{client, accesskey, secretkey}
 }
 
-func (k *Kraken) placeOrder(orderType, side, amount, price string, pair CurrencyPair) (*Order, error) {
+func (k *Kraken) placeOrder(orderType, side, amount, price string, pair goex.CurrencyPair) (*goex.Order, error) {
 	apiuri := "private/AddOrder"
 
 	params := url.Values{}
@@ -71,37 +72,37 @@ func (k *Kraken) placeOrder(orderType, side, amount, price string, pair Currency
 		return nil, err
 	}
 
-	var tradeSide TradeSide = SELL
+	var tradeSide goex.TradeSide = goex.SELL
 	if "buy" == side {
-		tradeSide = BUY
+		tradeSide = goex.BUY
 	}
 
-	return &Order{
+	return &goex.Order{
 		Currency: pair,
 		OrderID2: resp.TxIds[0],
-		Amount:   ToFloat64(amount),
-		Price:    ToFloat64(price),
+		Amount:   goex.ToFloat64(amount),
+		Price:    goex.ToFloat64(price),
 		Side:     tradeSide,
-		Status:   ORDER_UNFINISH}, nil
+		Status:   goex.ORDER_UNFINISH}, nil
 }
 
-func (k *Kraken) LimitBuy(amount, price string, currency CurrencyPair) (*Order, error) {
+func (k *Kraken) LimitBuy(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
 	return k.placeOrder("limit", "buy", amount, price, currency)
 }
 
-func (k *Kraken) LimitSell(amount, price string, currency CurrencyPair) (*Order, error) {
+func (k *Kraken) LimitSell(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
 	return k.placeOrder("limit", "sell", amount, price, currency)
 }
 
-func (k *Kraken) MarketBuy(amount, price string, currency CurrencyPair) (*Order, error) {
+func (k *Kraken) MarketBuy(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
 	return k.placeOrder("market", "buy", amount, price, currency)
 }
 
-func (k *Kraken) MarketSell(amount, price string, currency CurrencyPair) (*Order, error) {
+func (k *Kraken) MarketSell(amount, price string, currency goex.CurrencyPair) (*goex.Order, error) {
 	return k.placeOrder("market", "sell", amount, price, currency)
 }
 
-func (k *Kraken) CancelOrder(orderId string, currency CurrencyPair) (bool, error) {
+func (k *Kraken) CancelOrder(orderId string, currency goex.CurrencyPair) (bool, error) {
 	params := url.Values{}
 	apiuri := "private/CancelOrder"
 	params.Set("txid", orderId)
@@ -115,21 +116,21 @@ func (k *Kraken) CancelOrder(orderId string, currency CurrencyPair) (bool, error
 	return true, nil
 }
 
-func (k *Kraken) toOrder(orderinfo interface{}) Order {
+func (k *Kraken) toOrder(orderinfo interface{}) goex.Order {
 	omap := orderinfo.(map[string]interface{})
 	descmap := omap["descr"].(map[string]interface{})
-	return Order{
-		Amount:     ToFloat64(omap["vol"]),
-		Price:      ToFloat64(descmap["price"]),
-		DealAmount: ToFloat64(omap["vol_exec"]),
-		AvgPrice:   ToFloat64(omap["price"]),
+	return goex.Order{
+		Amount:     goex.ToFloat64(omap["vol"]),
+		Price:      goex.ToFloat64(descmap["price"]),
+		DealAmount: goex.ToFloat64(omap["vol_exec"]),
+		AvgPrice:   goex.ToFloat64(omap["price"]),
 		Side:       k.convertSide(descmap["type"].(string)),
 		Status:     k.convertOrderStatus(omap["status"].(string)),
-		OrderTime:  ToInt(omap["opentm"]),
+		OrderTime:  goex.ToInt(omap["opentm"]),
 	}
 }
 
-func (k *Kraken) GetOrderInfos(txids ...string) ([]Order, error) {
+func (k *Kraken) GetOrderInfos(txids ...string) ([]goex.Order, error) {
 	params := url.Values{}
 	params.Set("txid", strings.Join(txids, ","))
 
@@ -139,7 +140,7 @@ func (k *Kraken) GetOrderInfos(txids ...string) ([]Order, error) {
 		return nil, err
 	}
 
-	var ords []Order
+	var ords []goex.Order
 	for txid, v := range resultmap {
 		ord := k.toOrder(v)
 		ord.OrderID2 = txid
@@ -149,7 +150,7 @@ func (k *Kraken) GetOrderInfos(txids ...string) ([]Order, error) {
 	return ords, nil
 }
 
-func (k *Kraken) GetOneOrder(orderId string, currency CurrencyPair) (*Order, error) {
+func (k *Kraken) GetOneOrder(orderId string, currency goex.CurrencyPair) (*goex.Order, error) {
 	orders, err := k.GetOrderInfos(orderId)
 
 	if err != nil {
@@ -165,7 +166,7 @@ func (k *Kraken) GetOneOrder(orderId string, currency CurrencyPair) (*Order, err
 	return ord, nil
 }
 
-func (k *Kraken) GetUnfinishOrders(currency CurrencyPair) ([]Order, error) {
+func (k *Kraken) GetUnfinishOrders(currency goex.CurrencyPair) ([]goex.Order, error) {
 	var result struct {
 		Open map[string]interface{} `json:"open"`
 	}
@@ -175,7 +176,7 @@ func (k *Kraken) GetUnfinishOrders(currency CurrencyPair) ([]Order, error) {
 		return nil, err
 	}
 
-	var orders []Order
+	var orders []goex.Order
 
 	for txid, v := range result.Open {
 		ord := k.toOrder(v)
@@ -187,11 +188,11 @@ func (k *Kraken) GetUnfinishOrders(currency CurrencyPair) ([]Order, error) {
 	return orders, nil
 }
 
-func (k *Kraken) GetOrderHistorys(currency CurrencyPair, currentPage, pageSize int) ([]Order, error) {
+func (k *Kraken) GetOrderHistorys(currency goex.CurrencyPair, currentPage, pageSize int) ([]goex.Order, error) {
 	panic("")
 }
 
-func (k *Kraken) GetAccount() (*Account, error) {
+func (k *Kraken) GetAccount() (*goex.Account, error) {
 	params := url.Values{}
 	apiuri := "private/Balance"
 
@@ -201,18 +202,18 @@ func (k *Kraken) GetAccount() (*Account, error) {
 		return nil, err
 	}
 
-	acc := new(Account)
+	acc := new(goex.Account)
 	acc.Exchange = k.GetExchangeName()
-	acc.SubAccounts = make(map[Currency]SubAccount)
+	acc.SubAccounts = make(map[goex.Currency]goex.SubAccount)
 
 	for key, v := range resustmap {
 		currency := k.convertCurrency(key)
-		amount := ToFloat64(v)
+		amount := goex.ToFloat64(v)
 		//log.Println(symbol, amount)
-		acc.SubAccounts[currency] = SubAccount{Currency: currency, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
+		acc.SubAccounts[currency] = goex.SubAccount{Currency: currency, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
 
 		if currency.Symbol == "XBT" {
-			acc.SubAccounts[BTC] = SubAccount{Currency: BTC, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
+			acc.SubAccounts[goex.BTC] = goex.SubAccount{Currency: goex.BTC, Amount: amount, FrozenAmount: 0, LoanAmount: 0}
 		}
 	}
 
@@ -220,56 +221,56 @@ func (k *Kraken) GetAccount() (*Account, error) {
 
 }
 
-func (k *Kraken) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
+func (k *Kraken) Withdraw(currencyPair goex.CurrencyPair, address goex.CryptoAddressReader, amount float64, wallet string, adminPassword string) (*goex.Withdraw, error) {
 	apiuri := "private/Withdraw"
 	params := url.Values{}
-  a := strconv.FormatFloat(amount, 'f', -1, 64)
+	a := strconv.FormatFloat(amount, 'f', -1, 64)
 	params.Set("amount", a)
 	params.Set("asset", currencyPair.CurrencyA.String())
-	params.Set("key", address.Tag)
-  var result Withdraw
+	params.Set("key", address.Tag())
+	var result goex.Withdraw
 	err := k.doAuthenticatedRequest("POST", apiuri, params, &result)
 	if err != nil {
 		return nil, err
 	}
-  return &result, nil
+	return &result, nil
 }
 
-func (k *Kraken) WithdrawStatus(currency Currency) (*[]WithdrawStatus, error) {
+func (k *Kraken) WithdrawStatus(currency goex.Currency) (*[]WithdrawStatus, error) {
 	apiuri := "private/WithdrawStatus"
 	params := url.Values{}
 	params.Set("asset", currency.String())
-  var result []WithdrawStatus
+	var result []WithdrawStatus
 	err := k.doAuthenticatedRequest("POST", apiuri, params, &result)
 	if err != nil {
 		return nil, err
 	}
-  //fmt.Printf("resultmap: %v#\n", resultmap[0])
-  return &result, nil
+	//fmt.Printf("resultmap: %v#\n", resultmap[0])
+	return &result, nil
 }
 
-func (k *Kraken) GetTicker(currency CurrencyPair) (*Ticker, error) {
+func (k *Kraken) GetTicker(currency goex.CurrencyPair) (*goex.Ticker, error) {
 	var resultmap map[string]interface{}
 	err := k.doAuthenticatedRequest("GET", "public/Ticker?pair="+k.convertPair(currency).ToSymbol(""), url.Values{}, &resultmap)
 	if err != nil {
 		return nil, err
 	}
 
-	ticker := new(Ticker)
+	ticker := new(goex.Ticker)
 	for _, t := range resultmap {
 		tickermap := t.(map[string]interface{})
-		ticker.Last = ToFloat64(tickermap["c"].([]interface{})[0])
-		ticker.Buy = ToFloat64(tickermap["b"].([]interface{})[0])
-		ticker.Sell = ToFloat64(tickermap["a"].([]interface{})[0])
-		ticker.Low = ToFloat64(tickermap["l"].([]interface{})[0])
-		ticker.High = ToFloat64(tickermap["h"].([]interface{})[0])
-		ticker.Vol = ToFloat64(tickermap["v"].([]interface{})[0])
+		ticker.Last = goex.ToFloat64(tickermap["c"].([]interface{})[0])
+		ticker.Buy = goex.ToFloat64(tickermap["b"].([]interface{})[0])
+		ticker.Sell = goex.ToFloat64(tickermap["a"].([]interface{})[0])
+		ticker.Low = goex.ToFloat64(tickermap["l"].([]interface{})[0])
+		ticker.High = goex.ToFloat64(tickermap["h"].([]interface{})[0])
+		ticker.Vol = goex.ToFloat64(tickermap["v"].([]interface{})[0])
 	}
 
 	return ticker, nil
 }
 
-func (k *Kraken) GetDepth(size int, currency CurrencyPair) (*Depth, error) {
+func (k *Kraken) GetDepth(size int, currency goex.CurrencyPair) (*goex.Depth, error) {
 	apiuri := fmt.Sprintf("public/Depth?pair=%s&count=%d", k.convertPair(currency).ToSymbol(""), size)
 	var resultmap map[string]interface{}
 	err := k.doAuthenticatedRequest("GET", apiuri, url.Values{}, &resultmap)
@@ -278,30 +279,36 @@ func (k *Kraken) GetDepth(size int, currency CurrencyPair) (*Depth, error) {
 	}
 
 	//log.Println(respmap)
-	dep := Depth{}
+	dep := goex.Depth{}
 	for _, d := range resultmap {
 		depmap := d.(map[string]interface{})
 		asksmap := depmap["asks"].([]interface{})
 		bidsmap := depmap["bids"].([]interface{})
 		for _, v := range asksmap {
 			ask := v.([]interface{})
-			dep.AskList = append(dep.AskList, DepthRecord{ToFloat64(ask[0]), ToFloat64(ask[1])})
+			dep.AskList = append(dep.AskList, goex.DepthRecord{
+				Price:  goex.ToFloat64(ask[0]),
+				Amount: goex.ToFloat64(ask[1])},
+			)
 		}
 		for _, v := range bidsmap {
 			bid := v.([]interface{})
-			dep.BidList = append(dep.BidList, DepthRecord{ToFloat64(bid[0]), ToFloat64(bid[1])})
+			dep.BidList = append(dep.BidList, goex.DepthRecord{
+				Price:  goex.ToFloat64(bid[0]),
+				Amount: goex.ToFloat64(bid[1])},
+			)
 		}
 		break
 	}
 	return &dep, nil
 }
 
-func (k *Kraken) GetKlineRecords(currency CurrencyPair, period, size, since int) ([]Kline, error) {
+func (k *Kraken) GetKlineRecords(currency goex.CurrencyPair, period, size, since int) ([]goex.Kline, error) {
 	panic("")
 }
 
 //非个人，整个交易所的交易记录
-func (k *Kraken) GetTrades(currencyPair CurrencyPair, since int64) ([]Trade, error) {
+func (k *Kraken) GetTrades(currencyPair goex.CurrencyPair, since int64) ([]goex.Trade, error) {
 	panic("")
 }
 
@@ -342,7 +349,7 @@ func (k *Kraken) doAuthenticatedRequest(method, apiuri string, params url.Values
 		}
 	}
 
-	resp, err := NewHttpRequest(k.httpClient, method, API_DOMAIN+apiuri, params.Encode(), headers)
+	resp, err := goex.NewHttpRequest(k.httpClient, method, API_DOMAIN+apiuri, params.Encode(), headers)
 	if err != nil {
 		return err
 	}
@@ -364,46 +371,46 @@ func (k *Kraken) doAuthenticatedRequest(method, apiuri string, params url.Values
 	return nil
 }
 
-func (k *Kraken) convertCurrency(currencySymbol string) Currency {
+func (k *Kraken) convertCurrency(currencySymbol string) goex.Currency {
 	if len(currencySymbol) >= 4 {
 		currencySymbol = strings.Replace(currencySymbol, "X", "", 1)
 		currencySymbol = strings.Replace(currencySymbol, "Z", "", 1)
 	}
-	return NewCurrency(currencySymbol, "")
+	return goex.NewCurrency(currencySymbol, "")
 }
 
-func (k *Kraken) convertPair(pair CurrencyPair) CurrencyPair {
+func (k *Kraken) convertPair(pair goex.CurrencyPair) goex.CurrencyPair {
 	if "BTC" == pair.CurrencyA.Symbol {
-		return NewCurrencyPair(XBT, pair.CurrencyB)
+		return goex.NewCurrencyPair(goex.XBT, pair.CurrencyB)
 	}
 
 	if "BTC" == pair.CurrencyB.Symbol {
-		return NewCurrencyPair(pair.CurrencyA, XBT)
+		return goex.NewCurrencyPair(pair.CurrencyA, goex.XBT)
 	}
 
 	return pair
 }
 
-func (k *Kraken) convertSide(typeS string) TradeSide {
+func (k *Kraken) convertSide(typeS string) goex.TradeSide {
 	switch typeS {
 	case "sell":
-		return SELL
+		return goex.SELL
 	case "buy":
-		return BUY
+		return goex.BUY
 	}
-	return SELL
+	return goex.SELL
 }
 
-func (k *Kraken) convertOrderStatus(status string) TradeStatus {
+func (k *Kraken) convertOrderStatus(status string) goex.TradeStatus {
 	switch status {
 	case "open", "pending", "expired":
-		return ORDER_UNFINISH
+		return goex.ORDER_UNFINISH
 	case "canceled", "closed":
-		return ORDER_CANCEL
+		return goex.ORDER_CANCEL
 	case "filled":
-		return ORDER_FINISH
+		return goex.ORDER_FINISH
 	case "partialfilled":
-		return ORDER_PART_FINISH
+		return goex.ORDER_PART_FINISH
 	}
-	return ORDER_UNFINISH
+	return goex.ORDER_UNFINISH
 }

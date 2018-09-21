@@ -7,10 +7,10 @@ import (
 
 func TestCurrency2_String(t *testing.T) {
 	btc := NewCurrency("btc", "bitcoin")
-	btc2 := Currency{"BTC" , "bitcoin.org"}
+	btc2 := Currency{"BTC", "bitcoin.org"}
 	ltc := NewCurrency("ltc", "litecoin")
 	t.Log(btc == BTC)
-	t.Log(ltc.Desc , btc.Desc)
+	t.Log(ltc.Desc, btc.Desc)
 	t.Log(btc == btc2)
 }
 

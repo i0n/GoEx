@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/i0n/GoEx"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	. "github.com/nntaoli-project/GoEx"
 )
 
 const (

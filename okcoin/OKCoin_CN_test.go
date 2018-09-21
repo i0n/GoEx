@@ -1,9 +1,10 @@
 package okcoin
 
 import (
-	"github.com/i0n/GoEx"
 	"net/http"
 	"testing"
+
+	"github.com/nntaoli-project/GoEx"
 )
 
 var okcn = New(http.DefaultClient, "", "")
@@ -22,4 +23,3 @@ func TestOKCoinCN_API_GetDepth(t *testing.T) {
 //	klines , _ := okcn.GetKlineRecords(goex.BTC_CNY , "1min" , 1000 , -1)
 //	t.Log(klines)
 //}
-

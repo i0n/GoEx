@@ -1,55 +1,58 @@
-package kraken
+package kraken_test
 
 import (
-  "errors"
+	"errors"
 	"io/ioutil"
-	"gopkg.in/yaml.v2"
-  "bitbucket.org/i0n/compounda/addresses"
-	"github.com/i0n/GoEx"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	addresses "github.com/i0n/crypto-addresses"
+	goex "github.com/nntaoli-project/GoEx"
+	"github.com/nntaoli-project/GoEx/kraken"
+	"github.com/stretchr/testify/assert"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var configFilePath = "../api-keys.yml"
 
 // Manifest struct representing YAML api key manifest
 type Manifest struct {
-	APIVersion  int                       `yaml:"api_version"`
-	Exchanges   map[string]ExchangeKeys   `yaml:"exchanges"`
+	APIVersion int                     `yaml:"api_version"`
+	Exchanges  map[string]ExchangeKeys `yaml:"exchanges"`
 }
 
 // ExchangeKeys struct holds keys for each exchanges API
 type ExchangeKeys struct {
-  AccessKey string `yaml:"access_key"`
-  SecretKey string `yaml:"secret_key"`
+	AccessKey string `yaml:"access_key"`
+	SecretKey string `yaml:"secret_key"`
 }
 
 func GetManifest(configFilePath *string) *Manifest {
-  manifest := &Manifest{}
-  configFile, err := ioutil.ReadFile(*configFilePath)
-  if err != nil {
-    panic(err)
-  }
-  yaml.Unmarshal(configFile, &manifest)
-  return manifest
+	manifest := &Manifest{}
+	configFile, err := ioutil.ReadFile(*configFilePath)
+	if err != nil {
+		panic(err)
+	}
+	yaml.Unmarshal(configFile, &manifest)
+	return manifest
 }
+
 var manifest = GetManifest(&configFilePath)
-var k = New(http.DefaultClient, manifest.Exchanges["kraken.com"].AccessKey, manifest.Exchanges["kraken.com"].SecretKey)
+var k = kraken.New(http.DefaultClient, manifest.Exchanges["kraken.com"].AccessKey, manifest.Exchanges["kraken.com"].SecretKey)
 
 var BCH_XBT = goex.NewCurrencyPair(goex.BCH, goex.XBT)
 
 func TestKraken_GetDepth_Bid(t *testing.T) {
 	dep, err := k.GetDepth(2, goex.BTC_USD)
 	assert.Nil(t, err)
-  assert.True(t, dep.BidList[0].Price > dep.BidList[1].Price)
+	assert.True(t, dep.BidList[0].Price > dep.BidList[1].Price)
 	t.Log(dep)
 }
 
 func TestKraken_GetDepth_Ask(t *testing.T) {
 	dep, err := k.GetDepth(2, goex.BTC_USD)
 	assert.Nil(t, err)
-  assert.True(t, dep.AskList[0].Price < dep.AskList[1].Price)
+	assert.True(t, dep.AskList[0].Price < dep.AskList[1].Price)
 	t.Log(dep)
 }
 
@@ -100,7 +103,7 @@ func TestKraken_GetOneOrder(t *testing.T) {
 }
 
 func TestKraken_Withdraw(t *testing.T) {
-  _, err := k.Withdraw(goex.ETC_USD, addresses.All["okcoin.com"][goex.ETC], 0.1, "", "")
+	_, err := k.Withdraw(goex.ETC_USD, addresses.All["okcoin.com"][goex.ETC], 0.1, "", "")
 	assert.Equal(t, errors.New("EFunding:Invalid amount"), err)
 }
 

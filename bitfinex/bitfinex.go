@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/i0n/GoEx"
-  "bitbucket.org/i0n/compounda/exchanges"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"bitbucket.org/i0n/compounda/exchanges"
+	. "github.com/nntaoli-project/GoEx"
 )
 
 type Bitfinex struct {
@@ -35,7 +36,7 @@ func (bfx *Bitfinex) GetExchangeName() string {
 
 // GetSymbols Get all trade symbol pairs
 func (bfx *Bitfinex) GetSymbols() (map[string]interface{}, error) {
-  apiUrl := fmt.Sprintf("%s/symbols", BASE_URL)
+	apiUrl := fmt.Sprintf("%s/symbols", BASE_URL)
 	resp, err := HttpGet(bfx.httpClient, apiUrl)
 	if err != nil {
 		return nil, err
@@ -44,12 +45,12 @@ func (bfx *Bitfinex) GetSymbols() (map[string]interface{}, error) {
 	if resp["error"] != nil {
 		return nil, errors.New(resp["error"].(string))
 	}
-  for k, v := range resp {
-    fmt.Println(k)
-    fmt.Println(v)
-    fmt.Println("")
-  }
-  return resp, nil
+	for k, v := range resp {
+		fmt.Println(k)
+		fmt.Println(v)
+		fmt.Println("")
+	}
+	return resp, nil
 }
 
 func (bfx *Bitfinex) GetTicker(currencyPair CurrencyPair) (*Ticker, error) {
@@ -147,7 +148,7 @@ func (bfx *Bitfinex) GetWalletBalances() (map[string]*Account, error) {
 		account := walletmap[typeStr]
 		if account == nil {
 			account = new(Account)
-      account.Exchange = bfx.GetExchangeName()
+			account.Exchange = bfx.GetExchangeName()
 			account.SubAccounts = make(map[Currency]SubAccount)
 		}
 
@@ -174,75 +175,75 @@ func (bfx *Bitfinex) GetAccount() (*Account, error) {
 	return wallets["exchange"], nil
 }
 
-func (bfx *Bitfinex) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
-  var amountMinusTransactionFee float64
+func (bfx *Bitfinex) Withdraw(currencyPair CurrencyPair, address CryptoAddressReader, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
+	var amountMinusTransactionFee float64
 	path := "withdraw"
-  var c string
-  switch x := currencyPair.CurrencyA; x {
+	var c string
+	switch x := currencyPair.CurrencyA; x {
 	case BTC:
 		c = "bitcoin"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case BCH:
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case BCH:
 		c = "bcash"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case LTC:
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case LTC:
 		c = "litecoin"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case ETH:
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case ETH:
 		c = "ethereum"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case ETC:
-    c = "ethereumc"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case ZEC:
-    c = "zcash"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case XMR:
-    c = "monero"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case DASH:
-    c = "dash"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case XRP:
-    c = "ripple"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case EOS:
-    c = "eos"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case NEO:
-    c = "neo"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case AVT:
-    c = "aventus"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case QTUM:
-    c = "qtum"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  case EDO:
-    c = "eidoo"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
-  // REP is undocumented...
-  case REP:
-    c = "augur"
-    amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case ETC:
+		c = "ethereumc"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case ZEC:
+		c = "zcash"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case XMR:
+		c = "monero"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case DASH:
+		c = "dash"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case XRP:
+		c = "ripple"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case EOS:
+		c = "eos"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case NEO:
+		c = "neo"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case AVT:
+		c = "aventus"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case QTUM:
+		c = "qtum"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	case EDO:
+		c = "eidoo"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
+	// REP is undocumented...
+	case REP:
+		c = "augur"
+		amountMinusTransactionFee = amount - exchanges.All["bitfinex.com"].WithdrawFees[x]
 	default:
 		return nil, errors.New("Unsupported currency type")
 	}
-  a := strconv.FormatFloat(amountMinusTransactionFee, 'f', -1, 64)
+	a := strconv.FormatFloat(amountMinusTransactionFee, 'f', -1, 64)
 	params := map[string]interface{}{
-		"withdraw_type":    c,
-		"walletselected":   wallet,
-		"address":          address.Address,
-		"amount":           a,
-  }
+		"withdraw_type":  c,
+		"walletselected": wallet,
+		"address":        address.Address(),
+		"amount":         a,
+	}
 	var res []Withdraw
 	err := bfx.doAuthenticatedRequest("POST", path, params, &res)
 	if err != nil {
 		return nil, err
 	}
-  if res[0].Status != "success" {
-    return &res[0], errors.New(res[0].Message)
-  }
+	if res[0].Status != "success" {
+		return &res[0], errors.New(res[0].Message)
+	}
 	return &res[0], nil
 }
 

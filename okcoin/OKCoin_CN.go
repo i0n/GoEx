@@ -9,9 +9,10 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	. "github.com/i0n/GoEx"
-  "bitbucket.org/i0n/compounda/utils"
-  "bitbucket.org/i0n/compounda/exchanges"
+
+	"bitbucket.org/i0n/compounda/exchanges"
+	"bitbucket.org/i0n/compounda/utils"
+	. "github.com/nntaoli-project/GoEx"
 )
 
 const (
@@ -28,7 +29,7 @@ const (
 	url_orders_info   = "orders_info.do"
 	order_history_uri = "order_history.do"
 	trade_uri         = "trade_history.do"
-  url_withdraw      = "withdraw.do"
+	url_withdraw      = "withdraw.do"
 )
 
 type OKCoinCN_API struct {
@@ -87,23 +88,23 @@ func (ctx *OKCoinCN_API) buildPostForm(postForm *url.Values) error {
 }
 
 func (ctx *OKCoinCN_API) Withdraw(currencyPair CurrencyPair, address CryptoAddress, amount float64, wallet string, adminPassword string) (*Withdraw, error) {
-  var c string
+	var c string
 	postData := url.Values{}
-  s := strings.ToLower(currencyPair.ToSymbol("_"))
+	s := strings.ToLower(currencyPair.ToSymbol("_"))
 	postData.Set("symbol", s)
-  switch x := currencyPair.CurrencyA; x {
-  case BTC:
-    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
-  case LTC:
-    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
-  case ETH:
-    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
-  case ETC:
-    c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
-  }
+	switch x := currencyPair.CurrencyA; x {
+	case BTC:
+		c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
+	case LTC:
+		c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
+	case ETH:
+		c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
+	case ETC:
+		c = strconv.FormatFloat(exchanges.All["okcoin.com"].WithdrawFees[x], 'f', -1, 64)
+	}
 	postData.Set("chargefee", c)
 	postData.Set("withdraw_address", address.Address)
-  a := strconv.FormatFloat(amount, 'f', -1, 64)
+	a := strconv.FormatFloat(amount, 'f', -1, 64)
 	postData.Set("withdraw_amount", a)
 	postData.Set("trade_pwd", adminPassword)
 	postData.Set("target", "address")
@@ -122,9 +123,9 @@ func (ctx *OKCoinCN_API) Withdraw(currencyPair CurrencyPair, address CryptoAddre
 	if err != nil {
 		return &res, err
 	}
-  if res.Result == false {
-    return &res, errors.New(strconv.Itoa(res.ErrorCode))
-  }
+	if res.Result == false {
+		return &res, errors.New(strconv.Itoa(res.ErrorCode))
+	}
 
 	return &res, nil
 }
@@ -160,7 +161,7 @@ func (ctx *OKCoinCN_API) placeOrder(side, amount, price string, currency Currenc
 		return nil, err
 	}
 
-	if err , isok := respMap["error_code"].(float64) ; isok {
+	if err, isok := respMap["error_code"].(float64); isok {
 		return nil, errors.New(fmt.Sprint(err))
 	}
 
@@ -217,7 +218,7 @@ func (ctx *OKCoinCN_API) CancelOrder(orderId string, currency CurrencyPair) (boo
 		return false, err
 	}
 
-	if err , isok := respMap["error_code"].(float64) ; isok {
+	if err, isok := respMap["error_code"].(float64); isok {
 		return false, errors.New(fmt.Sprint(err))
 	}
 
@@ -244,7 +245,7 @@ func (ctx *OKCoinCN_API) getOrders(orderId string, currency CurrencyPair) ([]Ord
 		return nil, err
 	}
 
-	if err , isok := respMap["error_code"].(float64) ; isok {
+	if err, isok := respMap["error_code"].(float64); isok {
 		return nil, errors.New(fmt.Sprint(err))
 	}
 
@@ -331,7 +332,7 @@ func (ctx *OKCoinCN_API) GetAccount() (*Account, error) {
 		return nil, err
 	}
 
-	if err , isok := respMap["error_code"].(float64) ; isok {
+	if err, isok := respMap["error_code"].(float64); isok {
 		return nil, errors.New(fmt.Sprint(err))
 	}
 
@@ -430,13 +431,13 @@ func (ctx *OKCoinCN_API) GetDepth(size int, currency CurrencyPair) (*Depth, erro
 		return nil, err
 	}
 
-	if err , isok := bodyDataMap["error_code"].(float64) ; isok {
+	if err, isok := bodyDataMap["error_code"].(float64); isok {
 		return nil, errors.New(fmt.Sprint(err))
 	}
 
-	dep , isok := bodyDataMap["asks"].([]interface{})
+	dep, isok := bodyDataMap["asks"].([]interface{})
 	if !isok {
-		return nil , errors.New("parse data error")
+		return nil, errors.New("parse data error")
 	}
 
 	for _, v := range dep {
@@ -451,7 +452,7 @@ func (ctx *OKCoinCN_API) GetDepth(size int, currency CurrencyPair) (*Depth, erro
 		}
 		depth.AskList = append(depth.AskList, dr)
 	}
-  utils.ReverseSlice(depth.AskList) //reverse
+	utils.ReverseSlice(depth.AskList) //reverse
 
 	for _, v := range bodyDataMap["bids"].([]interface{}) {
 		var dr DepthRecord
@@ -547,7 +548,7 @@ func (ctx *OKCoinCN_API) GetOrderHistorys(currency CurrencyPair, currentPage, pa
 		return nil, err
 	}
 
-	if err , isok := respMap["error_code"].(float64) ; isok {
+	if err, isok := respMap["error_code"].(float64); isok {
 		return nil, errors.New(fmt.Sprint(err))
 	}
 

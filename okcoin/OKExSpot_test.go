@@ -1,10 +1,11 @@
 package okcoin
 
 import (
-	"github.com/i0n/GoEx"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/nntaoli-project/GoEx"
+	"github.com/stretchr/testify/assert"
 )
 
 var okexSpot = NewOKExSpot(http.DefaultClient, "", "")

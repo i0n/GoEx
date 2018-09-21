@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/i0n/GoEx"
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	. "github.com/nntaoli-project/GoEx"
 )
 
 type LendBookItem struct {

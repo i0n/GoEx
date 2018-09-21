@@ -1,6 +1,6 @@
 package bitfinex
 
-import . "github.com/i0n/GoEx"
+import . "github.com/nntaoli-project/GoEx"
 
 type MarginLimits struct {
 	Pair              string  `json:"on_pair"`

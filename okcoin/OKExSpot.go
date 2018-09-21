@@ -3,10 +3,11 @@ package okcoin
 import (
 	"encoding/json"
 	"errors"
-	. "github.com/i0n/GoEx"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	. "github.com/nntaoli-project/GoEx"
 )
 
 type OKExSpot struct {
